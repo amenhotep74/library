@@ -101,13 +101,12 @@ form.onsubmit = function(e) {
 
 // Function that toggles the form when add book is clicked 
 function showform() {
-    const bookform = document.getElementById("newbook");
-    if (bookform.style.visibility == "hidden"){
-        // set display to visible
-        bookform.style.visibility = "visibile";
+    var x = document.getElementById("form");
+    if (x.style.display === "none") {
+    x.style.display = "block";
     } else {
-        bookform.style.visibility = "hidden";
-    }
+    x.style.display = "none";
+  }
 }
 
 renderLibrary();
