@@ -1,112 +1,113 @@
-// write a constructor for creating "book" objects 
-// book object needs a title, author, number of pages, and read 
-let myLibrary = [];
-
-// user input book functions
-function userInput() {
-    // Get the values from user input
-    var title = document.querySelector('[data-name=title').value;
-    var author = document.querySelector('[data-name=author').value;
-    var numofpages = document.querySelector('[data-name=numofpages').value;
-    var read = document.querySelector('[data-name=read').checked;
-
-    // create a variable that will take in the values the user entered 
-    let newbook = new Book(title, author, numofpages, read)
-
-    // add the new book to library array 
-    myLibrary.push(newbook);
-
-    // display the array for testing
-    console.log(myLibrary);
-
-    // reset to blank to stop results duplicating
-    document.getElementById('target-id').innerHTML = "";
-    // for each item in the array perform: 
-    myLibrary.forEach(book => {
-        document.getElementById('target-id').innerHTML += 
-        `
-        <table>
-        <tr>
-            <td>Title: ${book.title}</td>
-            <td>Author: ${book.author}</td>
-            <td>Pages: ${book.numofpages}</td>
-            <td>Read: ${book.read}</td>
-            <td><button class="delete">Delete</button></td>
-        </tr>
-        </table>
-        `
-    });
-
-    // clear the text inputs after each entry
-    title = document.querySelector('[data-name=title').value = "";
-    author = document.querySelector('[data-name=author').value = "";
-    numofpages = document.querySelector('[data-name=numofpages').value;
-    read = document.querySelector('[data-name=read').checked;
-}
-
-function Book(title, author, numofpages, read = true) {
-    // passes the title that was passed into the function into the object as a prop.
-    this.title = title ; 
+console.log("JS Loaded!");
+// Book object constructor 
+function Book(title, author, pages, read) {
+    this.title = title;
     this.author = author;
-    this.numofpages = numofpages;
-    this.read = read ? "yes" : "no";
-    this.info = function() {
-        return info = `${title} by ${author}, ${pages} pages, ${read}`;
-    }
+    this.pages = pages;
+    this.read = read; 
 }
 
-// New book button toggles form 
+// function that returns all the data from a book object for example book2.prototype.info
+Book.prototype.info = function() {
+    return `${this.title} by ${this.author}. ${this.pages} pages. You have ${this.read ? "" : "not "}read this book.`
+}
+
+// Toggle between read and not read 
+Book.prototype.toggleRead = function() {
+    this.read = !this.read;
+}
+
+const myLibrary = [];
+
+function addBookToLibrary(book) {
+    myLibrary.push(book);
+}
+
+function removeBookFromLibrary(index) {
+    myLibrary.splice(index, 1);
+}
+
+// adding 2 books as objects to the constructor 
+addBookToLibrary(new Book("the Hobbit", "J.R.R Tolkien", 295, false));
+addBookToLibrary(new Book ("American Gods", "Neil Gaiman", 545, true));
+
+function renderLibrary() {
+    const bookList = document.querySelector('#book-list');
+    bookList.innerHTML = "";
+    // Go through each array item and trigger createBookCard for that array item.
+    const books = myLibrary.map((book, index) => createBookCard(book, index));
+    // For each book item appendChild 
+    books.forEach(book => bookList.appendChild(book));
+}
+
+function createBookCard(book, index) {
+    // add classlist to each div created 
+    const card = document.createElement("div");
+    card.classList.add("card");
+    // sets the dataset index of the div to be equal to the book's index. 
+    card.dataset.index = index;
+    // sets the card content to use the Book.prototype.info function
+    card.textContent = book.info();
+    // create a div element and then a class="buttons" to that element. 
+    const buttons = document.createElement("div");
+    buttons.classList.add("buttons");
+
+    // create a button 
+    const deleteButton = document.createElement("button");
+    // Set button value as DELETE 
+    deleteButton.textContent = "DELETE";
+    // Add button to class 
+    deleteButton.classList.add("red");
+    // add listener to delete button 
+    deleteButton.onclick = () => {
+        // run function removeBookFromLibrary
+        // run renderLibrary function 
+        removeBookFromLibrary(index);
+        renderLibrary();
+    };
+    buttons.appendChild(deleteButton);
+
+    const readButton = document.createElement("button");
+    readButton.textContent = book.read ? "I didn't read it!" : "I Read it!";
+    readButton.onclick = () => {
+        book.toggleRead();
+        renderLibrary();
+    };
+    buttons.appendChild(readButton);
+
+    card.appendChild(buttons);
+
+    return card;
+}
+
+// handling form inputs 
+const form = document.querySelector("#newbook");
+form.onsubmit = function(e) {
+    console.log(e);
+    e.preventDefault();
+    const { title, author, pages, read } = form;
+    console.log(read.value);
+    addBookToLibrary(
+        new Book(
+            title.value,
+            author.value,
+            pages.value,
+            read.value === "true" ? true : false
+        )
+    );
+    renderLibrary();
+    toggleNewBookForm();
+};
+
+// Function that toggles the form when add book is clicked 
 function showform() {
-    var x = document.getElementById("form");
-    if (x.style.display === "none") {
-        x.style.display = "block";
+    const bookform = document.getElementById("newbook");
+    if (bookform.style.visibility == "hidden"){
+        // set display to visible
+        bookform.style.visibility = "visibile";
     } else {
-        x.style.display = "none";
+        bookform.style.visibility = "hidden";
     }
 }
 
-// if delete button is pressed 
-document.querySelector('#target-id').addEventListener('click', (e) => {
-    if (e.target.classList.contains('delete')) {
-        e.target.parentElement.parentElement.remove();
-        removebook(e.target.parentElement.parentElement.children[0].textContent)
-    }
-});
-
-// removebook function 
-const removebook = (title) => {
-    myLibrary.forEach((book, index) => {
-        if (book.title == title) myLibrary.splice(index, 1);
-    })
-    // log objects after deletion 
-    console.log(myLibrary);
-}
-
-// change read status function
-const changeReadStatus = (read, title) => {
-    myLibrary.forEach(book => {
-        if(book.title === title) book.read = read
-    })
-}
-
-// change read status
-document.querySelector('#target-id').addEventListener('click', (e) => {
-    if (e.target.className == "read-status"){
-        if(e.target.textContent == 'yes') {
-            e.target.textContent = "no"
-            changeReadStatus(e.target.textContent, e.target.parentElement.children[0].textContent)
-        } else {
-            e.target.textContent = 'yes'
-            changeReadStatus(e.target.textContent, e.target.parentElement.children[0].textContent)
-        }
-    }
-});
-
-// once created different books and propertys can be created 
-// console.log(Book1.title, Book2.author, Book1.numofpages, Book1.Read);
-
-
-// function to display array onclick for testing 
-function display() {
-    console.log(myLibrary);
-}
+renderLibrary();
